@@ -21,6 +21,30 @@ namespace ObjectDumping.Tests
             this.testOutputHelper = testOutputHelper;
         }
 
+        class OuterTest
+        {
+            public InnerTest Inner { get; set; }
+        }
+
+        class InnerTest
+        {
+            public OuterTest Inner { get; set; }
+        }
+
+        [Fact]
+        public void DumpCircularDepends()
+        {
+            // Arrange
+            var outer = new OuterTest();
+            var inner = new InnerTest();
+
+            outer.Inner = inner;
+            inner.Inner = outer;
+
+            // Act
+            var dump = ObjectDumper.Dump(outer, DumpStyle.CSharp);
+        }
+
         [Fact]
         public void ShouldDumpObject()
         {

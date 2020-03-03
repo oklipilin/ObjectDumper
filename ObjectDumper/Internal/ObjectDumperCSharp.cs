@@ -18,6 +18,8 @@ namespace ObjectDumping.Internal
 
         public static string Dump(object element, DumpOptions dumpOptions = null)
         {
+            ListOfObjects.Clear();
+
             if (dumpOptions == null)
             {
                 dumpOptions = new DumpOptions();
@@ -81,22 +83,36 @@ namespace ObjectDumping.Internal
             foreach (var property in properties)
             {
                 var value = property.TryGetValue(o);
-                this.Write($"{property.Name} = ");
-                this.FormatValue(value);
-                if (!Equals(property, last))
+                if (!ListOfObjects.Contains(value))
                 {
-                    this.Write(",");
-                }
+                    this.Write($"{property.Name} = ");
+                    this.FormatValue(value);
+                    if (!Equals(property, last))
+                    {
+                        this.Write(",");
+                    }
 
-                this.LineBreak();
+                    this.LineBreak();
+                }
             }
 
             this.Level--;
             this.Write("}");
         }
 
+        public static HashSet<object> ListOfObjects = new HashSet<object>();
+
         private void FormatValue(object o, int intentLevel = 0)
         {
+            if (!ListOfObjects.Contains(o))
+            {
+                ListOfObjects.Add(o);
+            }
+            else
+            {
+                return;
+            }
+
             if (this.IsMaxLevel())
             {
                 return;
