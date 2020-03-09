@@ -108,7 +108,7 @@ namespace ObjectDumping.Internal
             {
                 foreach (var subParent in MapOfObjects[parent])
                 {
-                    if (subParent == child || IfChildIsParent(MapOfObjects[parent], child))
+                    if (subParent == child || IfChildIsParent(subParent, child))
                     {
                         return true;
                     }
@@ -329,17 +329,21 @@ namespace ObjectDumping.Internal
             var e = items.GetEnumerator();
             if (e.MoveNext())
             {
-                this.FormatValue(e.Current, this.Level);
-
-                while (e.MoveNext())
+                if (!IfChildIsParent(items, e.Current))
                 {
-                    this.Write(",");
-                    this.LineBreak();
-
+                    AddReference(items, e.Current);
                     this.FormatValue(e.Current, this.Level);
-                }
 
-                this.LineBreak();
+                    while (e.MoveNext())
+                    {
+                        this.Write(",");
+                        this.LineBreak();
+
+                        this.FormatValue(e.Current, this.Level);
+                    }
+
+                    this.LineBreak();
+                }
             }
 
             this.Level--;

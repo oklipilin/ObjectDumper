@@ -30,6 +30,8 @@ namespace ObjectDumping.Tests
         class InnerTest
         {
             public OuterTest Inner { get; set; }
+
+            public List<OuterTest> InnerList { get; set; }
         }
 
         [Fact]
@@ -41,6 +43,7 @@ namespace ObjectDumping.Tests
 
             outer.Inner = inner;
             inner.Inner = outer;
+            inner.InnerList = new List<OuterTest> { outer };
 
             outer.Inner2 = inner;
 
