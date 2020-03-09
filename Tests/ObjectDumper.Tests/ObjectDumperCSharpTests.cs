@@ -24,6 +24,7 @@ namespace ObjectDumping.Tests
         class OuterTest
         {
             public InnerTest Inner { get; set; }
+            public InnerTest Inner2 { get; set; }
         }
 
         class InnerTest
@@ -40,6 +41,8 @@ namespace ObjectDumping.Tests
 
             outer.Inner = inner;
             inner.Inner = outer;
+
+            outer.Inner2 = inner;
 
             // Act
             var dump = ObjectDumper.Dump(outer, DumpStyle.CSharp);

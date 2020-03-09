@@ -18,7 +18,8 @@ namespace ObjectDumping.Internal
 
         public static string Dump(object element, DumpOptions dumpOptions = null)
         {
-            ListOfObjects.Clear();
+            //ListOfObjects.Clear();
+            MapOfObjects.Clear();
 
             if (dumpOptions == null)
             {
@@ -83,8 +84,9 @@ namespace ObjectDumping.Internal
             foreach (var property in properties)
             {
                 var value = property.TryGetValue(o);
-                if (!ListOfObjects.Contains(value))
+                if (!IfChildIsParent(o, value))
                 {
+                    AddReference(o, value);
                     this.Write($"{property.Name} = ");
                     this.FormatValue(value);
                     if (!Equals(property, last))
@@ -100,19 +102,42 @@ namespace ObjectDumping.Internal
             this.Write("}");
         }
 
-        public static HashSet<object> ListOfObjects = new HashSet<object>();
+        public static bool IfChildIsParent(object parent, object child)
+        {
+            if (MapOfObjects.ContainsKey(parent))
+            {
+                foreach (var subParent in MapOfObjects[parent])
+                {
+                    if (subParent == child || IfChildIsParent(MapOfObjects[parent], child))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static void AddReference(object parent, object child)
+        {
+            if (child != null)
+            {
+                if (!MapOfObjects.ContainsKey(child))
+                {
+                    MapOfObjects.Add(child, new List<object> { parent });
+                }
+                else
+                {
+                    MapOfObjects[child].Add(parent);
+                }
+            }
+        }
+
+        //public static HashSet<object> ListOfObjects = new HashSet<object>();
+        public static Dictionary<object, List<object>> MapOfObjects = new Dictionary<object, List<object>>();
 
         private void FormatValue(object o, int intentLevel = 0)
         {
-            if (!ListOfObjects.Contains(o))
-            {
-                ListOfObjects.Add(o);
-            }
-            else
-            {
-                return;
-            }
-
             if (this.IsMaxLevel())
             {
                 return;
